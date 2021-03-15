@@ -2,7 +2,7 @@
 #define ROUTE_H
 
 // Rodolfo Higuera
-//struct for each route in each node's distance vector shared
+//struct for each route in each node's RT 
 //with neighbors 
 //to extract information, nodes will have to interate through a list of routes
 // for comparison with its own RT table values 
@@ -20,6 +20,10 @@ typedef nx_struct Route{
     nx_uint8_t payload[20]; //may need to change payload size if causes issues
 
 }Route;
+
+enum {
+    ROUTE_PACK = 11; //might need this to differentiate route packets w/ other types for checks 
+}
 
 uint16_t numRoutes = 0; //used to show how many routes per node[needed for forloop search/comparison]
 Route routeTable[MAX_ROUTES]; // should this be a *pointer? we'll find out!
