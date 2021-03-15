@@ -65,10 +65,16 @@ implementation {
     }
 
     command void dvr.initalizeDV(){
-        call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially 
+        call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
         //RH:should we iterate thru immediate neighbors at this point or is that later?
 
-        neighborList = call Neighbor.getNeighbors 
+        //get immediate neighbors
+        neighborList = call Neighbor.getNeighbors();
+
+        //add immediate neighbor distances to DV
+        for(i = 0; i < call neighborList.size(); i++){
+            call distVect.insert(i, 1);
+        } 
     }
 
     command void dvr.initalizeRT(){
