@@ -78,7 +78,6 @@ implementation {
 
     command void dvr.initalizeDV(){
         call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
-        //RH:should we iterate thru immediate neighbors at this point or is that later?
 
         //add immediate neighbor distances to DV
         for(i = 0; i < call neighborList.size(); i++){
@@ -107,7 +106,7 @@ implementation {
 
 
 
-    //changed to new RT struct to be sent to neighbors
+    //changed to new DVR struct to be sent to neighbors
     void makeRoute(Route *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL){
       Route->dest = dest;
       Route->nextHop = nextHop;

@@ -36,7 +36,7 @@ implementation {
 
     command void Flooding.beginFlood(uint16_t destination, uint8_t *payload, uint16_t num) { //starts broadcasting packet to neighbors
 
-        dbg(GENERAL_CHANNEL, "FLOODING BEGINS\n");   
+        //dbg(GENERAL_CHANNEL, "FLOODING BEGINS\n");   
         //make & send flooding packets out with the appropriate sequence number
         makePack(&sendPackage, TOS_NODE_ID, destination, 10, PROTOCOL_PING, num, payload, PACKET_MAX_PAYLOAD_SIZE);
         call FloodSender.send(sendPackage, AM_BROADCAST_ADDR);
@@ -48,7 +48,7 @@ implementation {
         
         if (len == sizeof(pack)){ //check for expected size of payload 
             pack* myMsg=(pack*) payload; //typecast payload to extract data in myMsg
-            dbg(FLOODING_CHANNEL, "Packet recieved at %d from %d!\n", TOS_NODE_ID, myMsg->src);
+            //dbg(FLOODING_CHANNEL, "Packet recieved at %d from %d!\n", TOS_NODE_ID, myMsg->src);
             if (myMsg->TTL == 0){ //verify TTL > 0
                 dbg(GENERAL_CHANNEL, "Packet expired from %d to destination %d with payload %s\n", myMsg->src, myMsg->dest, myMsg->payload);
                     return msg;
@@ -63,7 +63,7 @@ implementation {
                     //iterate thru list of keys 
                     //check if each key has a sequence # that matches myMsg->seq
                         //if true , discard packet 
-                    dbg(FLOODING_CHANNEL, "Packet arrived at destination %d from node %d with payload %s\n", myMsg->dest, myMsg->src, myMsg->payload);
+                    //dbg(FLOODING_CHANNEL, "Packet arrived at destination %d from node %d with payload %s\n", myMsg->dest, myMsg->src, myMsg->payload);
                     msgArrived = TRUE;
             } 
             else {
@@ -72,11 +72,11 @@ implementation {
                     result = ( call f_Hashmap.contains(myMsg->seq) );
                     
                     if ((result)) {
-                        dbg(GENERAL_CHANNEL, "Discarding Packet with sequence num %d\n", myMsg->seq);
+                        //dbg(GENERAL_CHANNEL, "Discarding Packet with sequence num %d\n", myMsg->seq);
                         return msg; //if it does contain the key, discard the packet
                     }
                     else {
-                        dbg(GENERAL_CHANNEL, "Adding seq %d with src %d to hashmap\n", myMsg->seq, myMsg->src);
+                        //dbg(GENERAL_CHANNEL, "Adding seq %d with src %d to hashmap\n", myMsg->seq, myMsg->src);
                         call f_Hashmap.insert(myMsg->seq, myMsg->src); //if not, add it to the hashmap 
                     }
 
@@ -88,9 +88,9 @@ implementation {
                     makePack(&sendPackage, TOS_NODE_ID, myMsg->dest, myMsg->TTL , myMsg->protocol, myMsg->seq, myMsg->payload, PACKET_MAX_PAYLOAD_SIZE);   
 
                     if (call FloodSender.send(sendPackage, AM_BROADCAST_ADDR) == SUCCESS){
-                        dbg(FLOODING_CHANNEL, " [Node %d] : Passing flooding packet to neighbors of \n", TOS_NODE_ID);
+                        //dbg(FLOODING_CHANNEL, " [Node %d] : Passing flooding packet to neighbors of \n", TOS_NODE_ID);
                     } else {
-                        dbg(FLOODING_CHANNEL, "Error sending flooding packet occured at node %d\n", TOS_NODE_ID);
+                        //dbg(FLOODING_CHANNEL, "Error sending flooding packet occured at node %d\n", TOS_NODE_ID);
                     }
             }
         }       

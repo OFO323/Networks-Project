@@ -46,7 +46,7 @@ implementation {
 
         call n_timer.startPeriodicAt(t, del);
 
-        dbg(GENERAL_CHANNEL, "Timer for node %d fired started at %d with interval %d\n", TOS_NODE_ID, t, del);
+        //dbg(GENERAL_CHANNEL, "Timer for node %d fired started at %d with interval %d\n", TOS_NODE_ID, t, del);
     }
 
     //process is called when timer fires for each node
@@ -68,7 +68,7 @@ implementation {
     }
     
     //RH : added as an extension for project 2
-    command List<uint16_t> Neighbor.getNeighbors(){
+    command void Neighbor.getNeighbors(){
         return n_List;
     }
 
