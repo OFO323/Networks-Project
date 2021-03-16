@@ -27,7 +27,9 @@ implementation{
 
     components new HashmapC(uint16_t, 50) as h;
     dvrP.distVect -> h;
-    dvrP.routeTable -> h;
+
+    components new HashmapC(uint16_t, 50) as h2;
+    dvrP.routeTable -> h2; //says no match???
 
     components new NeighborC() as n;
     dvrP.Neighbor -> n;

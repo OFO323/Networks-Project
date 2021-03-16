@@ -55,13 +55,15 @@ module dvrP{
 implementation {
     Route newRoute;
 
-    uint32_t i, j;
+    uint16_t i, j, keys[], nSize, neighbor;
+
+    nSize = call neighborList.size();
 
     //get immediate neighbors [might need to move into functions if causing errors]
     neighborList = call Neighbor.getNeighbors();
 
 
-    void makeRoute(Route *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL);
+    void makeRoute(Route *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length);
 
     //should start randomly and send out information periodically
     command void dvr.initalizeNodes(){
@@ -80,20 +82,30 @@ implementation {
         call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
 
         //add immediate neighbor distances to DV
-        for(i = 0; i < call neighborList.size(); i++){
+        for(i = 0; i < nSize; i++){
             call distVect.insert(i, 1);
-        } 
+        }
+
+        dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...", TOS_NODE_ID);
+
+
+        //iterate thru each neighbor value
+        //extract value of cost
+        // for(i = 0; i < call distVect.size(); i++){
+        //     dbg(GENERAL_CHANNEL, "Destination %d | Cost %d", i, );
+        // }
     }
 
-    command void dvr.initalizeRT(){
+    command void dvr.intializeRT(){
         //add self to RT
-        makeRoute(&newRoute, TOS_NODE_ID, TOS_NODE_ID, 0, MAX_TTL);
-        routeTable.insert(TOS_NODE_ID, newRoute);
+        makeRoute(&newRoute, TOS_NODE_ID, TOS_NODE_ID, 0, MAX_ROUTE_TTL);
+        routeTable.insert(TOS_NODE_ID, newRoute*); //err here
 
         //add neighbors to inital RT
-        for(j = 0; call neighborList.size(); i++){
-            makeRoute(&newRoute, call neighborList.get(i), call neighborList.get(i), 1, MAX_TTL);
-            routeTable.insert(call neighborList.get(i), newRoute);
+        for(j = 0; i < nSize; i++){
+            makeRoute(&newRoute, (call neighborList.get(i)), (call neighborList.get(i)), 1, MAX_ROUTE_TTL);
+            neighbor = call neighborList.get(i);
+            routeTable.insert(neighbor, newRoute*);
         }
     }
 
@@ -107,11 +119,11 @@ implementation {
 
 
     //changed to new DVR struct to be sent to neighbors
-    void makeRoute(Route *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL){
-      Route->dest = dest;
-      Route->nextHop = nextHop;
-      Route->cost = cost;
-      Route->TTL = TTL;
-      memcpy(Route->payload, payload, length);
+    void makeRoute(Route *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length){
+      route->dest = dest;
+      route->nextHop = nextHop;
+      route->cost = cost;
+      route->TTL = TTL;
+      memcpy(route->payload, payload, length);
    }
 }

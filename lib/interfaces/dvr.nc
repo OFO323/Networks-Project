@@ -3,5 +3,5 @@ interface dvr {
 
     command void initalizeDV();
 
-    command void initalizeRT();
+    command void intializeRT();
 }

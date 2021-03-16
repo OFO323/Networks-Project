@@ -30,6 +30,8 @@ module Node{
    uses interface Flooding;
 
    uses interface Neighbor;
+
+   uses interface dvr;
 }
 
 implementation{

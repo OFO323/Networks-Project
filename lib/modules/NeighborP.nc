@@ -68,7 +68,7 @@ implementation {
     }
     
     //RH : added as an extension for project 2
-    command void Neighbor.getNeighbors(){
+    command List<uint16_t> Neighbor.getNeighbors(){ //error here
         return n_List;
     }
 

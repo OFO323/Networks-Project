@@ -53,6 +53,9 @@ implementation {
         //Routing Table Componenet [?]
     //not sure if should split into different modules or all in one
 
+    components dvrC;
+    Node.dvr -> dvrC;
+
     
     components NeighborC;
     Node.Neighbor -> NeighborC;
