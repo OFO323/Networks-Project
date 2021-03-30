@@ -26,7 +26,7 @@
 
 
 // * test each node's initial RT and DV
-// * decide on when timers should be fired
+// * decide on when timers should be fired 
 // * implement dvr.sendRoutes [pseudcode in textbook]
 
 
@@ -55,12 +55,13 @@ module dvrP{
 implementation {
     Route newRoute;
 
-    uint16_t i, j, keys[], nSize, neighbor;
+    uint16_t i, j, x, z, keys[], neighbor, neighNum;
+    uint16_t nSize;
+    //get immediate neighbors [might need to move into functions if causing errors]
+    neighborList = (call Neighbor.getNeighbors());
 
     nSize = call neighborList.size();
 
-    //get immediate neighbors [might need to move into functions if causing errors]
-    neighborList = call Neighbor.getNeighbors();
 
 
     void makeRoute(Route *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length);
@@ -103,9 +104,48 @@ implementation {
 
         //add neighbors to inital RT
         for(j = 0; i < nSize; i++){
-            makeRoute(&newRoute, (call neighborList.get(i)), (call neighborList.get(i)), 1, MAX_ROUTE_TTL);
-            neighbor = call neighborList.get(i);
-            routeTable.insert(neighbor, newRoute*);
+            neighNum = call neighborList.get(i);
+            makeRoute(&newRoute, neighNum, neighNum, 1, MAX_ROUTE_TTL);
+            routeTable.insert(neighNum, newRoute*);
+        }
+    }
+
+    command void dvr.mergeRoutes(Route *route){
+        for(z = 0; z < numRoutes; ++z){
+            if(route->dest == routeTable[z].dest){ //might cause error
+                if((route->cost +1) < routeTable[z].cost){
+                    //found better route
+                    break; 
+                }else if(route->nextHop == routeTable[z].nextHop) {
+                    //metric for current next hop may have changed
+                    break;
+
+                }else{
+                    //route not interesting 
+                    return;
+                }
+            }
+        }
+
+        if(z == numRoutes){
+            /* this is a completely new route; is there room for it? */
+            if(numRoutes < MAX_ROUTES){
+                ++numRoutes;
+            } else {
+                /* can't fit this route in table so give up */
+                return;
+            }
+        }
+
+        routeTable[z] = *route;
+        routeTable[z].TTL = MAX_ROUTE_TTL;
+        ++routeTable[z].cost;
+        
+    }
+
+    command void dvr.updateRoutingTable(Route *newRoute, uint16_t numNewRoutes){
+        for(x = 0; x < numNewRoutes; ++x){
+            call dvr.mergeRoutes(&newRoute[x]); //this might cause error [what data structure is this accessing?]
         }
     }
 

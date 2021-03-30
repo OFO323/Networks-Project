@@ -12,17 +12,16 @@ enum {
     MAX_ROUTE_TTL = 120
 };
 
-typedef nx_struct Route{
+typedef nx_struct RouteMsg{
     nx_uint16_t dest;
     nx_uint16_t nextHop;
     nx_uint16_t cost;
     nx_uint16_t TTL;
     nx_uint16_t payload[20]; //may need to change payload size if causes issues
-
-}Route;
+} RouteMsg_t;
 
 enum {
-    ROUTE_PACK = 11 //might need this to differentiate route packets w/ other types for checks 
+    AM_ROUTE_PACK = 11 //might need this to differentiate route packets w/ other types for checks 
 };
 
 uint16_t numRoutes = 0; //used to show how many routes per node[needed for forloop search/comparison]

@@ -6,5 +6,5 @@ interface Neighbor {
 
     command void printNeighbors();
 
-    command void getNeighbors();
+    command List<uint16_t> getNeighbors();
 }

@@ -58,10 +58,8 @@ implementation {
 
     }
 
-    //RH: added function        //      will be called in the CommandHandler.printNeighbor function in Node.nc
     command void Neighbor.printNeighbors(){
 
-        //RH: could maybe consider how long [how many discovery packets recieved by neighbor] before confirming neighbor
         for (i = 0; i < call n_List.size(); i++){
             dbg(NEIGHBOR_CHANNEL, "A neighbor of node %d is %d\n",TOS_NODE_ID, call n_List.get(i));
         }
