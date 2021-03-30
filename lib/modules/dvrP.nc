@@ -34,7 +34,7 @@ module dvrP{
     provides interface dvr;
 
 
-
+    uses interface
     uses interface Receive;
     uses interface SimpleSend as dvrSend;
 
@@ -79,75 +79,75 @@ implementation {
 
     }
 
-    command void dvr.initalizeDV(){
-        call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
+    // command void dvr.initalizeDV(){
+    //     call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
 
-        //add immediate neighbor distances to DV
-        for(i = 0; i < nSize; i++){
-            call distVect.insert(i, 1);
-        }
+    //     //add immediate neighbor distances to DV
+    //     for(i = 0; i < nSize; i++){
+    //         call distVect.insert(i, 1);
+    //     }
 
-        dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...", TOS_NODE_ID);
+    //     dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...", TOS_NODE_ID);
 
 
-        //iterate thru each neighbor value
-        //extract value of cost
-        // for(i = 0; i < call distVect.size(); i++){
-        //     dbg(GENERAL_CHANNEL, "Destination %d | Cost %d", i, );
-        // }
-    }
+    //     //iterate thru each neighbor value
+    //     //extract value of cost
+    //     // for(i = 0; i < call distVect.size(); i++){
+    //     //     dbg(GENERAL_CHANNEL, "Destination %d | Cost %d", i, );
+    //     // }
+    // }
 
-    command void dvr.intializeRT(){
-        //add self to RT
-        makeRoute(&newRoute, TOS_NODE_ID, TOS_NODE_ID, 0, MAX_ROUTE_TTL);
-        routeTable.insert(TOS_NODE_ID, newRoute*); //err here
+    // command void dvr.intializeRT(){
+    //     //add self to RT
+    //     makeRoute(&newRoute, TOS_NODE_ID, TOS_NODE_ID, 0, MAX_ROUTE_TTL);
+    //     routeTable.insert(TOS_NODE_ID, newRoute*); //err here
 
-        //add neighbors to inital RT
-        for(j = 0; i < nSize; i++){
-            neighNum = call neighborList.get(i);
-            makeRoute(&newRoute, neighNum, neighNum, 1, MAX_ROUTE_TTL);
-            routeTable.insert(neighNum, newRoute*);
-        }
-    }
+    //     //add neighbors to inital RT
+    //     for(j = 0; i < nSize; i++){
+    //         neighNum = call neighborList.get(i);
+    //         makeRoute(&newRoute, neighNum, neighNum, 1, MAX_ROUTE_TTL);
+    //         routeTable.insert(neighNum, newRoute*);
+    //     }
+    // }
 
-    command void dvr.mergeRoutes(Route *route){
-        for(z = 0; z < numRoutes; ++z){
-            if(route->dest == routeTable[z].dest){ //might cause error
-                if((route->cost +1) < routeTable[z].cost){
-                    //found better route
-                    break; 
-                }else if(route->nextHop == routeTable[z].nextHop) {
-                    //metric for current next hop may have changed
-                    break;
+    // command void dvr.mergeRoutes(Route *route){
+    //     for(z = 0; z < numRoutes; ++z){
+    //         if(route->dest == routeTable[z].dest){ //might cause error
+    //             if((route->cost +1) < routeTable[z].cost){
+    //                 //found better route
+    //                 break; 
+    //             }else if(route->nextHop == routeTable[z].nextHop) {
+    //                 //metric for current next hop may have changed
+    //                 break;
 
-                }else{
-                    //route not interesting 
-                    return;
-                }
-            }
-        }
+    //             }else{
+    //                 //route not interesting 
+    //                 return;
+    //             }
+    //         }
+    //     }
 
-        if(z == numRoutes){
-            /* this is a completely new route; is there room for it? */
-            if(numRoutes < MAX_ROUTES){
-                ++numRoutes;
-            } else {
-                /* can't fit this route in table so give up */
-                return;
-            }
-        }
+    //     if(z == numRoutes){
+    //         /* this is a completely new route; is there room for it? */
+    //         if(numRoutes < MAX_ROUTES){
+    //             ++numRoutes;
+    //         } else {
+    //             /* can't fit this route in table so give up */
+    //             return;
+    //         }
+    //     }
 
-        routeTable[z] = *route;
-        routeTable[z].TTL = MAX_ROUTE_TTL;
-        ++routeTable[z].cost;
+    //     routeTable[z] = *route;
+    //     routeTable[z].TTL = MAX_ROUTE_TTL;
+    //     ++routeTable[z].cost;
         
-    }
+    // }
 
-    command void dvr.updateRoutingTable(Route *newRoute, uint16_t numNewRoutes){
-        for(x = 0; x < numNewRoutes; ++x){
-            call dvr.mergeRoutes(&newRoute[x]); //this might cause error [what data structure is this accessing?]
-        }
-    }
+    // command void dvr.updateRoutingTable(Route *newRoute, uint16_t numNewRoutes){
+    //     for(x = 0; x < numNewRoutes; ++x){
+    //         call dvr.mergeRoutes(&newRoute[x]); //this might cause error [what data structure is this accessing?]
+    //     }
+    // }
 
 
     event void dvrTimer.fired(){
