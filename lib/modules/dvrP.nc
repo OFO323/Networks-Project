@@ -58,7 +58,11 @@ implementation {
     uint16_t i, j, x, z, keys[], neighbor, neighNum;
     uint16_t nSize;
     //get immediate neighbors [might need to move into functions if causing errors]
-    neighborList = (call Neighbor.getNeighbors());
+    neighborList = (call Neighbor.getNeighbors()
+    // how to pass the array directly into this list? 
+    //1. retrieve the pointer data
+    //2. iterate through the array and add onto the neighborList
+    );
 
     nSize = call neighborList.size();
 
@@ -70,6 +74,7 @@ implementation {
     command void dvr.initalizeNodes(){
         call dvr.initalizeDV();
         call dvr.intializeRT();
+
 
 
         //RH:should timer start randomly or in sync?
