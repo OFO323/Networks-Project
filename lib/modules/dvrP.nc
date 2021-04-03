@@ -34,18 +34,18 @@ module dvrP{
     provides interface dvr;
 
 
-    uses interface
+    //uses interface
     uses interface Receive;
     uses interface SimpleSend as dvrSend;
 
     uses interface Timer<TMilli> as dvrTimer;
     uses interface Random;
 
-    uses interface List<uint16_t> as neighborList;
+    //uses interface List<uint16_t> as neighborList;
 
-    uses interface Hashmap<uint16_t> as distVect;
+    //uses interface Hashmap<uint16_t> as distVect;
     
-    uses interface Hashmap<Route*> as routeTable;
+    //uses interface Hashmap<Route*> as routeTable;
 
     uses interface Neighbor; //used to pull DV info from closest neighbors
 
@@ -53,7 +53,8 @@ module dvrP{
 }
 
 implementation {
-    Route newRoute;
+    RouteMsg newRoute;
+
 
     uint16_t i, j, x, z, keys[], neighbor, neighNum;
     uint16_t nSize;
@@ -64,14 +65,19 @@ implementation {
     //2. iterate through the array and add onto the neighborList
     );
 
-    nSize = call neighborList.size();
+
+
+    //will use arrays instead of list and hashmap [brute force-ish but it'll do]
+    RouteMsg routeTable[255]; 
+    uint16_t distV[255];
 
 
 
-    void makeRoute(Route *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length);
+    void makeRoute(RouteMsg *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length);
 
     //should start randomly and send out information periodically
     command void dvr.initalizeNodes(){
+        //both functions below employ neighbor discovery to inititialize the nodes
         call dvr.initalizeDV();
         call dvr.intializeRT();
 
@@ -115,7 +121,7 @@ implementation {
     //     }
     // }
 
-    // command void dvr.mergeRoutes(Route *route){
+    // command void dvr.mergeRoutes(RouteMsg *route){
     //     for(z = 0; z < numRoutes; ++z){
     //         if(route->dest == routeTable[z].dest){ //might cause error
     //             if((route->cost +1) < routeTable[z].cost){
@@ -164,7 +170,7 @@ implementation {
 
 
     //changed to new DVR struct to be sent to neighbors
-    void makeRoute(Route *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length){
+    void makeRoute(RouteMsg *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length){
       route->dest = dest;
       route->nextHop = nextHop;
       route->cost = cost;
