@@ -68,7 +68,7 @@ implementation {
 
 
     //will use arrays instead of list and hashmap [brute force-ish but it'll do]
-    RouteMsg routeTable[255]; 
+    //RouteMsg routeTable[255]; //this is already included in route.h
     uint16_t distV[255];
 
 

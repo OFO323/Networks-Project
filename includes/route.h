@@ -25,6 +25,6 @@ enum {
 };
 
 uint16_t numRoutes = 0; //used to show how many routes per node[needed for forloop search/comparison]
-Route routeTable[MAX_ROUTES]; // should this be a *pointer? we'll find out!
+RouteMsg routeTable[MAX_ROUTES]; // should this be a *pointer? we'll find out!
 
 #endif
