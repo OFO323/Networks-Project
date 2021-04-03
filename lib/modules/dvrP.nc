@@ -55,12 +55,9 @@ module dvrP{
 implementation {
     Route newRoute;
 
-    uint16_t i, j, x, z, keys[], neighbor, neighNum;
-    uint16_t nSize;
-    //get immediate neighbors [might need to move into functions if causing errors]
-    neighborList = (call Neighbor.getNeighbors());
-
-    nSize = call neighborList.size();
+    //will use arrays instead of list and hashmap [brute force-ish but it'll do]
+    uint16_t routeTable[255] = {0} 
+    uint16_t distV[255] = {0}
 
 
 
@@ -68,6 +65,7 @@ implementation {
 
     //should start randomly and send out information periodically
     command void dvr.initalizeNodes(){
+        //both functions below employ neighbor discovery to inititialize the nodes
         call dvr.initalizeDV();
         call dvr.intializeRT();
 
@@ -79,23 +77,23 @@ implementation {
 
     }
 
-    // command void dvr.initalizeDV(){
-    //     call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
+    command void dvr.initalizeDV(){
+        call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
 
-    //     //add immediate neighbor distances to DV
-    //     for(i = 0; i < nSize; i++){
-    //         call distVect.insert(i, 1);
-    //     }
+        //add immediate neighbor distances to DV
+        for(i = 0; i < nSize; i++){
+            call distVect.insert(i, 1);
+        }
 
-    //     dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...", TOS_NODE_ID);
+        dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...", TOS_NODE_ID);
 
 
-    //     //iterate thru each neighbor value
-    //     //extract value of cost
-    //     // for(i = 0; i < call distVect.size(); i++){
-    //     //     dbg(GENERAL_CHANNEL, "Destination %d | Cost %d", i, );
-    //     // }
-    // }
+        //iterate thru each neighbor value
+        //extract value of cost
+        // for(i = 0; i < call distVect.size(); i++){
+        //     dbg(GENERAL_CHANNEL, "Destination %d | Cost %d", i, );
+        // }
+    }
 
     // command void dvr.intializeRT(){
     //     //add self to RT
