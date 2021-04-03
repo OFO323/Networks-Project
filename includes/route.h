@@ -18,7 +18,7 @@ typedef nx_struct RouteMsg{
     nx_uint16_t cost;
     nx_uint16_t TTL;
     nx_uint16_t payload[20]; //may need to change payload size if causes issues
-} RouteMsg_t;
+} RouteMsg; //
 
 enum {
     AM_ROUTE_PACK = 11 //might need this to differentiate route packets w/ other types for checks 
