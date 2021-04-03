@@ -56,6 +56,16 @@ implementation {
     RouteMsg newRoute;
 
 
+    uint16_t i, j, x, z, keys[], neighbor, neighNum;
+    uint16_t nSize;
+    //get immediate neighbors [might need to move into functions if causing errors]
+    neighborList = (call Neighbor.getNeighbors()
+    // how to pass the array directly into this list? 
+    //1. retrieve the pointer data
+    //2. iterate through the array and add onto the neighborList
+    );
+
+
 
     //will use arrays instead of list and hashmap [brute force-ish but it'll do]
     RouteMsg routeTable[255]; 
@@ -70,6 +80,7 @@ implementation {
         //both functions below employ neighbor discovery to inititialize the nodes
         call dvr.initalizeDV();
         call dvr.intializeRT();
+
 
 
         //RH:should timer start randomly or in sync?

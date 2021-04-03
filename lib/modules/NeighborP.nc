@@ -28,6 +28,7 @@ module NeighborP{
 
 implementation {
     pack sendPackage;
+    uint8_t n_array[40] = {0};
 
    // Prototypes
    void makePack(pack *Package, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
@@ -67,8 +68,13 @@ implementation {
     }
     
     //RH : added as an extension for project 2
-    command List<uint16_t> Neighbor.getNeighbors(){ //error here
-        return n_List;
+    command uint8_t* Neighbor.getNeighbors(){ //error here
+        //return n_List;
+        //adding in the copy to an array here
+        for (i = 0; i < call n_List.size(); i++) {
+            n_array[i] = call n_List.get(i);
+        }
+        return n_array;
     }
 
     event void n_timer.fired(){
