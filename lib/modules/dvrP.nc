@@ -59,10 +59,12 @@ implementation {
     uint16_t nSize;
     uint16_t i;
 
-    uint8_t * neighbors = (call Neighbor.getNeighbors());
     //2. iterate through the array and add onto the neighborList
+    
+    uint8_t * neighbors;
 
     void convertNeighbors(){
+        neighbors = call Neighbor.getNeighbors();
         for (i = 0; neighbors[i] != 0; i++) {
             call neighborList.pushfront(neighbors[i]);
         }
