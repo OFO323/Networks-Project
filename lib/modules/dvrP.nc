@@ -55,15 +55,18 @@ module dvrP{
 implementation {
     RouteMsg newRoute;
 
+    uint8_t * neighbors = (call Neighbor.getNeighbors()
+    //2. iterate through the array and add onto the neighborList
+    for (i = 0; neighbors[i] != 0; i++) {
+        neighborList.pushfront(neighbors[i]);
+    }
+    
+    );
+
 
     uint16_t i, j, x, z, keys[], neighbor, neighNum;
     uint16_t nSize;
     //get immediate neighbors [might need to move into functions if causing errors]
-    neighborList = (call Neighbor.getNeighbors()
-    // how to pass the array directly into this list? 
-    //1. retrieve the pointer data
-    //2. iterate through the array and add onto the neighborList
-    );
 
 
 
