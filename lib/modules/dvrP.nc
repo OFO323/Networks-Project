@@ -43,7 +43,7 @@ module dvrP{
 
     uses interface List<uint16_t> as neighborList;
 
-    uses interface Hashmap<uint16_t> as distVect;
+    uses interface Hashmap<uint8_t> as distVect;
     
     //uses interface Hashmap<RouteMsg*> as routeTable;
 
@@ -58,75 +58,63 @@ implementation {
 
     uint16_t nSize;
     uint16_t i;
-
-    //2. iterate through the array and add onto the neighborList
-    
+    uint8_t neighID;
     uint8_t * neighbors;
-
-    void convertNeighbors(){
-        neighbors = call Neighbor.getNeighbors();
-        for (i = 0; neighbors[i] != 0; i++) {
-            call neighborList.pushfront(neighbors[i]);
-        }
-    }
-
-
-
-    //will use arrays instead of list and hashmap [brute force-ish but it'll do]
     
     //RouteMsg routeTable[255]; //this is already included in route.h
 
     uint16_t distV[255];
 
-
-
     void makeRoute(RouteMsg *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length);
 
+
     //should start randomly and send out information periodically
-    // command void dvr.initalizeNodes(){
-    //     //both functions below employ neighbor discovery to inititialize the nodes
-    //     call dvr.initalizeDV();
-    //     call dvr.intializeRT();
+    command void dvr.initalizeNodes(){
+        //both functions below employ neighbor discovery to inititialize the nodes
+        call dvr.initalizeDV();
+        call dvr.intializeRT();
 
+        //RH:should timer start randomly or in sync?
+        //call dvrTimer.startPeriodicAt(t, del);
 
+    }
 
-    //     //RH:should timer start randomly or in sync?
+    command void dvr.initalizeDV(){
 
+        //convertNeighbors();
 
-    //     //call dvrTimer.startPeriodicAt(t, del);
+        call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
+        neighbors = call Neighbor.getNeighbors();
 
-    // }
+        //add immediate neighbors' distances to DV
+        for (i = 0; neighbors[i] != 0; i++) {
+            call distVect.insert(neighbors[i], 1);
 
-    // command void dvr.initalizeDV(){
-    //     call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
+            //call neighborList.pushfront(neighbors[i]);
+        }
 
-    //     //add immediate neighbor distances to DV
-    //     for(i = 0; i < nSize; i++){
-    //         call distVect.insert(i, 1);
-    //     }
+        dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...", TOS_NODE_ID);
 
-    //     dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...", TOS_NODE_ID);
+        //iterate thru each neighbor value extract value of cost
+        for(i = 0; i < call distVect.size(); i++){
+            dbg(GENERAL_CHANNEL, "Destination %d | Cost %d", neighbors[i], call distVect.get(neighbors[i]));
+        }
+    }
 
+    command void dvr.intializeRT(){
+        //add self to RT
+        makeRoute(&newRoute, TOS_NODE_ID, TOS_NODE_ID, 0, MAX_ROUTE_TTL, "RT msg", PACKET_MAX_PAYLOAD_SIZE);
+        //routeTable.insert(TOS_NODE_ID, newRoute*); //err here
+        i = 0;
+        routeTable[i] = newRoute;
 
-    //     //iterate thru each neighbor value
-    //     //extract value of cost
-    //     // for(i = 0; i < call distVect.size(); i++){
-    //     //     dbg(GENERAL_CHANNEL, "Destination %d | Cost %d", i, );
-    //     // }
-    // }
-
-    // command void dvr.intializeRT(){
-    //     //add self to RT
-    //     makeRoute(&newRoute, TOS_NODE_ID, TOS_NODE_ID, 0, MAX_ROUTE_TTL);
-    //     routeTable.insert(TOS_NODE_ID, newRoute*); //err here
-
-    //     //add neighbors to inital RT
-    //     for(j = 0; i < nSize; i++){
-    //         neighNum = call neighborList.get(i);
-    //         makeRoute(&newRoute, neighNum, neighNum, 1, MAX_ROUTE_TTL);
-    //         routeTable.insert(neighNum, newRoute*);
-    //     }
-    // }
+        //add immediate neighbors to inital RT
+        for(i = 1; i < nSize; i++){
+            neighID = call neighborList.get(i);
+            makeRoute(&newRoute, neighID, neighID, 1, MAX_ROUTE_TTL, "RT msg", PACKET_MAX_PAYLOAD_SIZE);
+            routeTable[i] = newRoute;
+        }
+    }
 
     // command void dvr.mergeRoutes(RouteMsg *route){
     //     for(z = 0; z < numRoutes; ++z){
@@ -174,14 +162,19 @@ implementation {
         }
     }
 
-
     // event void dvrTimer.fired(){
     //     //call dvr.sendRoutes 
     //     //call dvr.mergeRoutes
     //     //call dvr.updateRoutingTable
     // }
 
-
+    //placeholder: may be redundant but can be useful for updating nieghbor array in situations where node connection lost
+    void convertNeighbors(){
+        neighbors = call Neighbor.getNeighbors();
+        for (i = 0; neighbors[i] != 0; i++) {
+            call neighborList.pushfront(neighbors[i]);
+        }
+    }
 
     //changed to new DVR struct to be sent to neighbors
     void makeRoute(RouteMsg *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length){

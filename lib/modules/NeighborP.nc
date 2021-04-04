@@ -70,10 +70,10 @@ implementation {
     }
     
     //RH : added as an extension for project 2
-    command uint8_t* Neighbor.getNeighbors(){ //error here
-        //return n_List;
+    //works fine but may need to implement check incase multiple of the same nodeID appear
+    command uint8_t* Neighbor.getNeighbors(){ 
         //adding in the copy to an array here
-        for (i = 0; i < call n_List.size(); i++) {
+        for (i = 0; i < call n_List.size(); i++) { 
             n_array[i] = call n_List.get(i);
         }
         return n_array;

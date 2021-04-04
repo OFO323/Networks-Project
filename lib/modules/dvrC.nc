@@ -26,7 +26,7 @@ implementation{
     components new ListC(uint16_t, 50) as l;
     dvrP.neighborList -> l;
 
-    components new HashmapC(uint16_t, 50) as h;
+    components new HashmapC(uint8_t, 50) as h;
     dvrP.distVect -> h;
 
     //components new HashmapC(uint16_t, 50) as h2;
