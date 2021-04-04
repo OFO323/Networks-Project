@@ -42,8 +42,8 @@ implementation {
 
 
     //flooding module connected 
-    components FloodingC;
-    Node.Flooding -> FloodingC;
+    // components FloodingC;
+    // Node.Flooding -> FloodingC;
 
     //Project 2
 

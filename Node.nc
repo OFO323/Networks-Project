@@ -90,7 +90,7 @@ implementation{
    event void CommandHandler.ping(uint16_t destination, uint8_t *payload){
       num = num + 1;
       dbg(GENERAL_CHANNEL, "PING EVENT with num %d\n", num);
-      call Flooding.beginFlood(destination, payload, num);
+      //call Flooding.beginFlood(destination, payload, num);
       makePack(&sendPackage, TOS_NODE_ID, destination, 0, 0, num, payload, PACKET_MAX_PAYLOAD_SIZE);
       call Sender.send(sendPackage, destination);
    }

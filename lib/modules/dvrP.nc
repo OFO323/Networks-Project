@@ -41,11 +41,11 @@ module dvrP{
     uses interface Timer<TMilli> as dvrTimer;
     uses interface Random;
 
-    //uses interface List<uint16_t> as neighborList;
+    uses interface List<uint16_t> as neighborList;
 
-    //uses interface Hashmap<uint16_t> as distVect;
+    uses interface Hashmap<uint16_t> as distVect;
     
-    //uses interface Hashmap<Route*> as routeTable;
+    //uses interface Hashmap<RouteMsg*> as routeTable;
 
     uses interface Neighbor; //used to pull DV info from closest neighbors
 
@@ -56,19 +56,24 @@ implementation {
     RouteMsg newRoute;
 
 
-    uint16_t i, j, x, z, keys[], neighbor, neighNum;
     uint16_t nSize;
-    //get immediate neighbors [might need to move into functions if causing errors]
-    neighborList = (call Neighbor.getNeighbors()
-    // how to pass the array directly into this list? 
-    //1. retrieve the pointer data
+    uint16_t i;
+
+    uint8_t * neighbors = (call Neighbor.getNeighbors());
     //2. iterate through the array and add onto the neighborList
-    );
+
+    void convertNeighbors(){
+        for (i = 0; neighbors[i] != 0; i++) {
+            call neighborList.pushfront(neighbors[i]);
+        }
+    }
 
 
 
     //will use arrays instead of list and hashmap [brute force-ish but it'll do]
+    
     //RouteMsg routeTable[255]; //this is already included in route.h
+
     uint16_t distV[255];
 
 
@@ -76,19 +81,19 @@ implementation {
     void makeRoute(RouteMsg *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length);
 
     //should start randomly and send out information periodically
-    command void dvr.initalizeNodes(){
-        //both functions below employ neighbor discovery to inititialize the nodes
-        call dvr.initalizeDV();
-        call dvr.intializeRT();
+    // command void dvr.initalizeNodes(){
+    //     //both functions below employ neighbor discovery to inititialize the nodes
+    //     call dvr.initalizeDV();
+    //     call dvr.intializeRT();
 
 
 
-        //RH:should timer start randomly or in sync?
+    //     //RH:should timer start randomly or in sync?
 
 
-        //call dvrTimer.startPeriodicAt(t, del);
+    //     //call dvrTimer.startPeriodicAt(t, del);
 
-    }
+    // }
 
     // command void dvr.initalizeDV(){
     //     call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
@@ -160,12 +165,19 @@ implementation {
     //     }
     // }
 
+    event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){
+        if(len==sizeof(RouteMsg)){
+            RouteMsg* myMsg=(RouteMsg*) payload;
 
-    event void dvrTimer.fired(){
-        //call dvr.sendRoutes 
-        //call dvr.mergeRoutes
-        //call dvr.updateRoutingTable
+        }
     }
+
+
+    // event void dvrTimer.fired(){
+    //     //call dvr.sendRoutes 
+    //     //call dvr.mergeRoutes
+    //     //call dvr.updateRoutingTable
+    // }
 
 
 

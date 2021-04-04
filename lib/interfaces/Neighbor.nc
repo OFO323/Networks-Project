@@ -7,4 +7,6 @@ interface Neighbor {
     command void printNeighbors();
 
     command uint8_t* getNeighbors();
+
+    command uint8_t* neighSize();
 }

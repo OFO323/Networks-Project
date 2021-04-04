@@ -1,4 +1,5 @@
 #include "../../includes/packet.h"
+#include "../../includes/route.h"
 #include <Timer.h>
 
 configuration dvrC{
@@ -10,10 +11,10 @@ implementation{
     dvr = dvrP.dvr;
 
     //may nee to include package type (i.e. ROUTE_PACK in route.h)
-    components new SimpleSendC(ROUTE_PACK) as routeSender;
+    components new SimpleSendC(AM_ROUTE_PACK) as routeSender;
     dvrP.dvrSend -> routeSender;
 
-    components new AMReceiverC(ROUTE_PACK) as routeReciever;
+    components new AMReceiverC(AM_ROUTE_PACK) as routeReciever;
     dvrP.Receive -> routeReciever;
 
     components new TimerMilliC() as t;
@@ -28,9 +29,9 @@ implementation{
     components new HashmapC(uint16_t, 50) as h;
     dvrP.distVect -> h;
 
-    components new HashmapC(uint16_t, 50) as h2;
-    dvrP.routeTable -> h2; //says no match???
+    //components new HashmapC(uint16_t, 50) as h2;
+    // dvrP.routeTable -> h; //says no match???
 
-    components new NeighborC() as n;
+    components NeighborC as n;
     dvrP.Neighbor -> n;
 }

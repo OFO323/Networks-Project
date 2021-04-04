@@ -41,6 +41,8 @@ implementation {
     //project 2: used to get nieghbors to initalize DV of each node
     uint16_t x;
 
+    uint8_t nSize;
+
     //way of choosing which node discovers neighbors first [deals with problem of congestion]
     command void Neighbor.initTimer(){
         t = (call Random.rand32()) % 2013;
@@ -75,6 +77,11 @@ implementation {
             n_array[i] = call n_List.get(i);
         }
         return n_array;
+    }
+
+    command uint8_t* Neighbor.neighSize(){
+        //nSize = call n_List.size();
+        return (uint8_t *)call n_List.size(); //fixed warning 
     }
 
     event void n_timer.fired(){

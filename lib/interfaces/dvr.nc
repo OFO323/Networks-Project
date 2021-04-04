@@ -1,7 +1,7 @@
 interface dvr {
-    command void initalizeNodes();
+    // command void initalizeNodes();
 
-    command void initalizeDV();
+    // command void initalizeDV();
 
-    command void intializeRT();
+    // command void intializeRT();
 }
