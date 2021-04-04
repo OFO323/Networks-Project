@@ -55,13 +55,8 @@ module dvrP{
 implementation {
     RouteMsg newRoute;
 
-    uint8_t * neighbors = (call Neighbor.getNeighbors()
-    //2. iterate through the array and add onto the neighborList
-    for (i = 0; neighbors[i] != 0; i++) {
-        neighborList.pushfront(neighbors[i]);
-    }
-    
-    );
+    uint8_t * neighbors = (call Neighbor.getNeighbors());
+
 
 
     uint16_t i, j, x, z, keys[], neighbor, neighNum;
@@ -83,7 +78,9 @@ implementation {
         //both functions below employ neighbor discovery to inititialize the nodes
         call dvr.initalizeDV();
         call dvr.intializeRT();
-
+        for (i = 0; neighbors[i] != 0; i++) {
+        neighborList.pushfront(neighbors[i]);
+        }
 
 
         //RH:should timer start randomly or in sync?
