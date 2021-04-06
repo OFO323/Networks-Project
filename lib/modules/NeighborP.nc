@@ -74,8 +74,8 @@ implementation {
     command uint8_t* Neighbor.getNeighbors(){ 
         //adding in the copy to an array here
         for (i = 0; i < call n_List.size(); i++) { 
-            dbg(GENERAL_CHANNEL,'added %d to neighbor array', n_array[i]);
             n_array[i] = call n_List.get(i);
+            dbg(NEIGHBOR_CHANNEL,"added %d to neighbor array\n", n_array[i]);
         }
         return n_array;
     }
