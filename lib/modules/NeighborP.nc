@@ -74,14 +74,15 @@ implementation {
     command uint8_t* Neighbor.getNeighbors(){ 
         //adding in the copy to an array here
         for (i = 0; i < call n_List.size(); i++) { 
+            dbg(GENERAL_CHANNEL,'added %d to neighbor array', n_array[i]);
             n_array[i] = call n_List.get(i);
         }
         return n_array;
     }
 
-    command uint8_t* Neighbor.neighSize(){
-        //nSize = call n_List.size();
-        return (uint8_t *)call n_List.size(); //fixed warning 
+    command uint16_t* Neighbor.neighSize(){
+        nSize = call n_List.size();
+        return (uint16_t*)nSize; //warning 
     }
 
     event void n_timer.fired(){
@@ -116,9 +117,7 @@ implementation {
                     }
                     call n_List.pushfront(myMsg->src); //add to list
                 }
-
             }
-
             return msg;
         }
     }

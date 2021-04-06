@@ -53,7 +53,9 @@ implementation{
 
       dbg(GENERAL_CHANNEL, "Booted\n");
       //call below for neighbor discovery
-      //call Neighbor.initTimer();
+      call Neighbor.initTimer();
+
+      call dvr.initalizeNodes();
 
    }
 
@@ -69,10 +71,10 @@ implementation{
    event void AMControl.stopDone(error_t err){}
 
    event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){ //look here 
-      dbg(GENERAL_CHANNEL, "Packet Received\n");
+      //dbg(GENERAL_CHANNEL, "Packet Received\n");
       if(len==sizeof(pack)){
          pack* myMsg=(pack*) payload;
-         dbg(GENERAL_CHANNEL, "Package Payload: %s\n", myMsg->payload);
+         //dbg(GENERAL_CHANNEL, "Package Payload: %s\n", myMsg->payload);
 
 
          //if protocol is ping reply -> neigbor discovery 
@@ -93,6 +95,7 @@ implementation{
       //call Flooding.beginFlood(destination, payload, num);
       makePack(&sendPackage, TOS_NODE_ID, destination, 0, 0, num, payload, PACKET_MAX_PAYLOAD_SIZE);
       call Sender.send(sendPackage, destination);
+
    }
 
    event void CommandHandler.printNeighbors(){}

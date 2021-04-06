@@ -59,7 +59,7 @@ implementation {
     uint16_t nSize;
     uint16_t i;
     uint8_t neighID;
-    uint8_t * neighbors;
+    uint8_t *neighbors;
     uint8_t z;
     uint8_t x;
     
@@ -72,6 +72,7 @@ implementation {
 
     //should start randomly and send out information periodically
     command void dvr.initalizeNodes(){
+
         //both functions below employ neighbor discovery to inititialize the nodes
         call dvr.initalizeDV();
         call dvr.intializeRT();
@@ -86,32 +87,44 @@ implementation {
         //convertNeighbors();
 
         call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
+
+        //call Neighbor.printNeighbors();
+
         neighbors = call Neighbor.getNeighbors();
+        dbg(GENERAL_CHANNEL,"added %d to DV\n", neighbors[0]); //issue : neighbors not recieved
 
         //add immediate neighbors' distances to DV
         for (i = 0; neighbors[i] != 0; i++) {
             call distVect.insert(neighbors[i], 1);
-
+            dbg(GENERAL_CHANNEL,"added %d to DV\n", neighbors[i]);
             //call neighborList.pushfront(neighbors[i]);
         }
 
-        dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...", TOS_NODE_ID);
+        dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...\n", TOS_NODE_ID);
 
         //iterate thru each neighbor value extract value of cost
         for(i = 0; i < call distVect.size(); i++){
-            dbg(GENERAL_CHANNEL, "Destination %d | Cost %d", neighbors[i], call distVect.get(neighbors[i]));
+            dbg(GENERAL_CHANNEL, "Destination %d | Cost %d\n", neighbors[i], call distVect.get(neighbors[i]));
         }
     }
 
     command void dvr.intializeRT(){
+
+        //initial # of immediate nieghbors
+        nSize = (uint16_t)call Neighbor.neighSize(); //issue : nSize not recieved 
+        dbg(GENERAL_CHANNEL,"nSize is %d\n", nSize);
+
         //add self to RT
         makeRoute(&newRoute, TOS_NODE_ID, TOS_NODE_ID, 0, MAX_ROUTE_TTL, "RT msg", PACKET_MAX_PAYLOAD_SIZE);
+        //dbg(GENERAL_CHANNEL, "Adding self to RT : %d\n", TOS_NODE_ID);
+
         //routeTable.insert(TOS_NODE_ID, newRoute*); //err here
         i = 0;
         routeTable[i] = newRoute;
 
         //add immediate neighbors to inital RT
         for(i = 1; i < nSize; i++){
+            dbg(GENERAL_CHANNEL, "iterating thru RT array : %d \n", i);
             neighID = call neighborList.get(i);
             makeRoute(&newRoute, neighID, neighID, 1, MAX_ROUTE_TTL, "RT msg", PACKET_MAX_PAYLOAD_SIZE);
             routeTable[i] = newRoute;
@@ -123,17 +136,15 @@ implementation {
             if(route->dest == routeTable[z].dest){ //might cause error
                 if((route->cost +1) < routeTable[z].cost){
                     //found better route
-                    dbg(GENERAL_CHANNEL, "found better route");
+                    dbg(GENERAL_CHANNEL, "found better route\n");
                     break; 
                 }else if(route->nextHop == routeTable[z].nextHop) {
                     //metric for current next hop may have changed
-                    dbg(GENERAL_CHANNEL, "metric for current next hop may have changed");
+                    dbg(GENERAL_CHANNEL, "metric for current next hop may have changed\n");
                     break;
-
                 }else{
                     //route not interesting 
-                    dbg(GENERAL_CHANNEL, "route not interesting");
-
+                    dbg(GENERAL_CHANNEL, "route not interesting\n");
                     return;
                 }
             }
@@ -145,7 +156,7 @@ implementation {
                 ++numRoutes;
             } else {
                 /* can't fit this route in table so give up */
-                dbg(GENERAL_CHANNEL, "cant fit this route in table so give up");
+                dbg(GENERAL_CHANNEL, "cant fit this route in table so give up\n");
                 return;
             }
         }
@@ -156,7 +167,8 @@ implementation {
         ++routeTable[z].cost;
         
     }
-
+    //calls mergeRoute to incorporate all the routes contained in a routing update
+    //that is received from a neighboring node.
     command void dvr.updateRoutingTable(RouteMsg *newR, uint16_t numNewRoutes){
         for(x = 0; x < numNewRoutes; ++x){
             call dvr.mergeRoutes(&newR[x]); //this might cause error [what data structure is this accessing?]
@@ -168,7 +180,7 @@ implementation {
             RouteMsg* myMsg=(RouteMsg*) payload;
 
             //this is where nodes will update their routes given DV information recieved by neighbors  
-            //call dvr.updateRoutingTable
+            //call dvr.updateRoutingTable(new route, )
 
         }
     }

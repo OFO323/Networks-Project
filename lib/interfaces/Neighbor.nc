@@ -8,5 +8,5 @@ interface Neighbor {
 
     command uint8_t* getNeighbors();
 
-    command uint8_t* neighSize();
+    command uint16_t* neighSize();
 }
