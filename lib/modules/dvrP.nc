@@ -60,6 +60,8 @@ implementation {
     uint16_t i;
     uint8_t neighID;
     uint8_t * neighbors;
+    uint8_t z;
+    uint8_t x;
     
     //RouteMsg routeTable[255]; //this is already included in route.h
 
@@ -116,57 +118,65 @@ implementation {
         }
     }
 
-    // command void dvr.mergeRoutes(RouteMsg *route){
-    //     for(z = 0; z < numRoutes; ++z){
-    //         if(route->dest == routeTable[z].dest){ //might cause error
-    //             if((route->cost +1) < routeTable[z].cost){
-    //                 //found better route
-    //                 break; 
-    //             }else if(route->nextHop == routeTable[z].nextHop) {
-    //                 //metric for current next hop may have changed
-    //                 break;
+    command void dvr.mergeRoutes(RouteMsg *route){
+        for(z = 0; z < numRoutes; ++z){
+            if(route->dest == routeTable[z].dest){ //might cause error
+                if((route->cost +1) < routeTable[z].cost){
+                    //found better route
+                    dbg(GENERAL_CHANNEL, "found better route");
+                    break; 
+                }else if(route->nextHop == routeTable[z].nextHop) {
+                    //metric for current next hop may have changed
+                    dbg(GENERAL_CHANNEL, "metric for current next hop may have changed");
+                    break;
 
-    //             }else{
-    //                 //route not interesting 
-    //                 return;
-    //             }
-    //         }
-    //     }
+                }else{
+                    //route not interesting 
+                    dbg(GENERAL_CHANNEL, "route not interesting");
 
-    //     if(z == numRoutes){
-    //         /* this is a completely new route; is there room for it? */
-    //         if(numRoutes < MAX_ROUTES){
-    //             ++numRoutes;
-    //         } else {
-    //             /* can't fit this route in table so give up */
-    //             return;
-    //         }
-    //     }
+                    return;
+                }
+            }
+        }
 
-    //     routeTable[z] = *route;
-    //     routeTable[z].TTL = MAX_ROUTE_TTL;
-    //     ++routeTable[z].cost;
+        if(z == numRoutes){
+            /* this is a completely new route; is there room for it? */
+            if(numRoutes < MAX_ROUTES){
+                ++numRoutes;
+            } else {
+                /* can't fit this route in table so give up */
+                dbg(GENERAL_CHANNEL, "cant fit this route in table so give up");
+                return;
+            }
+        }
+
+        routeTable[z] = *route;
+        routeTable[z].TTL = MAX_ROUTE_TTL;
+        //account for hop from current node
+        ++routeTable[z].cost;
         
-    // }
+    }
 
-    // command void dvr.updateRoutingTable(Route *newRoute, uint16_t numNewRoutes){
-    //     for(x = 0; x < numNewRoutes; ++x){
-    //         call dvr.mergeRoutes(&newRoute[x]); //this might cause error [what data structure is this accessing?]
-    //     }
-    // }
+    command void dvr.updateRoutingTable(RouteMsg *newR, uint16_t numNewRoutes){
+        for(x = 0; x < numNewRoutes; ++x){
+            call dvr.mergeRoutes(&newR[x]); //this might cause error [what data structure is this accessing?]
+        }
+    }
 
     event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){
         if(len==sizeof(RouteMsg)){
             RouteMsg* myMsg=(RouteMsg*) payload;
 
+            //this is where nodes will update their routes given DV information recieved by neighbors  
+            //call dvr.updateRoutingTable
+
         }
     }
 
-    // event void dvrTimer.fired(){
-    //     //call dvr.sendRoutes 
-    //     //call dvr.mergeRoutes
-    //     //call dvr.updateRoutingTable
-    // }
+    event void dvrTimer.fired(){
+        //when timer fires, node periodically sends routes DV to neighbors 
+        //call dvr.sendRoutes() 
+    }
 
     //placeholder: may be redundant but can be useful for updating nieghbor array in situations where node connection lost
     void convertNeighbors(){
