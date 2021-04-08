@@ -62,6 +62,8 @@ implementation {
     uint8_t *neighbors;
     uint8_t z;
     uint8_t x;
+
+    uint32_t t, del; //used for timer
     
     //RouteMsg routeTable[255]; //this is already included in route.h
 
@@ -73,12 +75,14 @@ implementation {
     //should start randomly and send out information periodically
     command void dvr.initalizeNodes(){
 
-        //both functions below employ neighbor discovery to inititialize the nodes
-        call dvr.initalizeDV();
-        call dvr.intializeRT();
+        
+        // call dvr.initalizeDV();
+        // call dvr.intializeRT();
 
-        //RH:should timer start randomly or in sync?
-        //call dvrTimer.startPeriodicAt(t, del);
+        //both functions below employ neighbor discovery to inititialize the nodes
+        t = (call Random.rand32()) % 2013;
+        del = 5000 + (call Random.rand32()) % 10021;
+        call dvrTimer.startPeriodicAt(t, del);
 
     }
 
@@ -188,6 +192,8 @@ implementation {
     event void dvrTimer.fired(){
         //when timer fires, node periodically sends routes DV to neighbors 
         //call dvr.sendRoutes() 
+        call dvr.initalizeDV();
+        call dvr.intializeRT();
     }
 
     //placeholder: may be redundant but can be useful for updating nieghbor array in situations where node connection lost
