@@ -82,7 +82,7 @@ implementation {
 
     command uint16_t* Neighbor.neighSize(){
         nSize = call n_List.size();
-        return (uint16_t*)nSize; //warning 
+        return (uint16_t*)nSize; 
     }
 
     event void n_timer.fired(){

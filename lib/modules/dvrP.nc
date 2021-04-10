@@ -20,11 +20,6 @@
 
 
 //TODO:
-// - create an initalized distance vector for each node [every destination from node except self/immediate neighbors should be inifinte(i.e. 16 by RIP)] [done]
-// - create initalized routing table to be updated after first set of hops [done]
-//above is done but still need to test 
-
-
 // * test each node's initial RT and DV
 // * decide on when timers should be fired 
 // * implement dvr.sendRoutes [pseudcode in textbook]
@@ -65,8 +60,6 @@ implementation {
 
     uint32_t t, del; //used for timer
     
-    //RouteMsg routeTable[255]; //this is already included in route.h
-
     uint16_t distV[255];
 
     void makeRoute(RouteMsg *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length);
@@ -76,13 +69,13 @@ implementation {
     command void dvr.initalizeNodes(){
 
         
-        // call dvr.initalizeDV();
-        // call dvr.intializeRT();
+        call dvr.initalizeDV();
+        call dvr.intializeRT();
 
         //both functions below employ neighbor discovery to inititialize the nodes
-        t = (call Random.rand32()) % 2013;
-        del = 5000 + (call Random.rand32()) % 10021;
-        call dvrTimer.startPeriodicAt(t, del);
+        // t = (call Random.rand32()) % 2013;
+        // del = 5000 + (call Random.rand32()) % 10021;
+        // call dvrTimer.startPeriodicAt(t, del);
 
     }
 
@@ -115,8 +108,7 @@ implementation {
     command void dvr.intializeRT(){
 
         //initial # of immediate nieghbors
-        nSize = (uint16_t)call Neighbor.neighSize(); //issue : nSize not recieved 
-        dbg(GENERAL_CHANNEL,"nSize is %d\n", nSize);
+        nSize = (uint16_t)call Neighbor.neighSize(); 
 
         //add self to RT
         makeRoute(&newRoute, TOS_NODE_ID, TOS_NODE_ID, 0, MAX_ROUTE_TTL, "RT msg", PACKET_MAX_PAYLOAD_SIZE);
@@ -128,9 +120,10 @@ implementation {
 
         //add immediate neighbors to inital RT
         for(i = 1; i < nSize; i++){
-            dbg(GENERAL_CHANNEL, "iterating thru RT array : %d \n", i);
+            //dbg(GENERAL_CHANNEL, "iterating thru RT array : %d \n", i);
             neighID = call neighborList.get(i);
             makeRoute(&newRoute, neighID, neighID, 1, MAX_ROUTE_TTL, "RT msg", PACKET_MAX_PAYLOAD_SIZE);
+            dbg(GENERAL_CHANNEL, "Destination %d | Cost %d | Next Hop %d\n", neighID, call distVect.get(neighbors[i]), neighID);
             routeTable[i] = newRoute;
         }
     }
@@ -179,6 +172,14 @@ implementation {
         }
     }
 
+    command void dvr.sendRoutes(){
+        //might just have to loop thru RT, create a routemsg containing DV info, then send out 
+        dbg(GENERAL_CHANNEL, "Sending DV from %d\n", TOS_NODE_ID);
+        for(i = 0; i < routeTable.size(); i++){
+            call dvrSend
+        }
+    }
+
     event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){
         if(len==sizeof(RouteMsg)){
             RouteMsg* myMsg=(RouteMsg*) payload;
@@ -190,10 +191,8 @@ implementation {
     }
 
     event void dvrTimer.fired(){
-        //when timer fires, node periodically sends routes DV to neighbors 
+        //when timer fires, node periodically sends routes DV to neighbors
         //call dvr.sendRoutes() 
-        call dvr.initalizeDV();
-        call dvr.intializeRT();
     }
 
     //placeholder: may be redundant but can be useful for updating nieghbor array in situations where node connection lost

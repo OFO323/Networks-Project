@@ -10,4 +10,6 @@ interface dvr {
     command void mergeRoutes(RouteMsg *route);
 
     command void updateRoutingTable(RouteMsg *newR, uint16_t numNewRoutes);
+
+    command void sendRoutes();
 }

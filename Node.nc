@@ -46,11 +46,7 @@ implementation{
 
 
    event void Boot.booted(){
-
-
       call AMControl.start();
-
-
       dbg(GENERAL_CHANNEL, "Booted\n");
       //call below for neighbor discovery
       call Neighbor.initTimer();
@@ -74,14 +70,6 @@ implementation{
       //dbg(GENERAL_CHANNEL, "Packet Received\n");
       if(len==sizeof(pack)){
          pack* myMsg=(pack*) payload;
-         //dbg(GENERAL_CHANNEL, "Package Payload: %s\n", myMsg->payload);
-
-
-         //if protocol is ping reply -> neigbor discovery 
-            //broadcast from TOS_NODE_ID
-
-
-         //else if protocol is PING -> flooding
          return msg;
       }
       dbg(GENERAL_CHANNEL, "Unknown Packet Type %d\n", len);
@@ -95,7 +83,6 @@ implementation{
       //call Flooding.beginFlood(destination, payload, num);
       makePack(&sendPackage, TOS_NODE_ID, destination, 0, 0, num, payload, PACKET_MAX_PAYLOAD_SIZE);
       call Sender.send(sendPackage, destination);
-
    }
 
    event void CommandHandler.printNeighbors(){}
