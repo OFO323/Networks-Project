@@ -69,13 +69,11 @@ implementation {
     command void dvr.initalizeNodes(){
 
         
-        call dvr.initalizeDV();
-        call dvr.intializeRT();
 
         //both functions below employ neighbor discovery to inititialize the nodes
-        // t = (call Random.rand32()) % 2013;
-        // del = 5000 + (call Random.rand32()) % 10021;
-        // call dvrTimer.startPeriodicAt(t, del);
+        t = (call Random.rand32()) % 2013;
+        del = 5000 + (call Random.rand32()) % 10021;
+        call dvrTimer.startPeriodicAt(t, del);
 
     }
 
@@ -114,7 +112,7 @@ implementation {
         makeRoute(&newRoute, TOS_NODE_ID, TOS_NODE_ID, 0, MAX_ROUTE_TTL, "RT msg", PACKET_MAX_PAYLOAD_SIZE);
         //dbg(GENERAL_CHANNEL, "Adding self to RT : %d\n", TOS_NODE_ID);
 
-        //routeTable.insert(TOS_NODE_ID, newRoute*); //err here
+        //call routeTable.insert(TOS_NODE_ID, &newRoute);
         i = 0;
         routeTable[i] = newRoute;
 
@@ -173,11 +171,11 @@ implementation {
     }
 
     command void dvr.sendRoutes(){
-        //might just have to loop thru RT, create a routemsg containing DV info, then send out 
-        dbg(GENERAL_CHANNEL, "Sending DV from %d\n", TOS_NODE_ID);
-        for(i = 0; i < routeTable.size(); i++){
-            call dvrSend
-        }
+        // //might just have to loop thru RT, create a routemsg containing DV info, then send out 
+        // dbg(GENERAL_CHANNEL, "Sending DV from %d\n", TOS_NODE_ID);
+        // for(i = 0; i < routeTable.size(); i++){
+        //     call dvrSend
+        // }
     }
 
     event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){
@@ -193,6 +191,9 @@ implementation {
     event void dvrTimer.fired(){
         //when timer fires, node periodically sends routes DV to neighbors
         //call dvr.sendRoutes() 
+        call dvr.initalizeDV();
+        call dvr.intializeRT();
+
     }
 
     //placeholder: may be redundant but can be useful for updating nieghbor array in situations where node connection lost
