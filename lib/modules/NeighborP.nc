@@ -75,7 +75,7 @@ implementation {
         //adding in the copy to an array here
         for (i = 0; i < call n_List.size(); i++) { 
             n_array[i] = call n_List.get(i);
-            dbg(NEIGHBOR_CHANNEL,"added %d to neighbor array\n", n_array[i]);
+            //dbg(NEIGHBOR_CHANNEL,"added %d to neighbor array\n", n_array[i]);
         }
         return n_array;
     }

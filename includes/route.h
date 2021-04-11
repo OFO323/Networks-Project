@@ -9,7 +9,9 @@
 
 enum {
     MAX_ROUTES = 128,
-    MAX_ROUTE_TTL = 120
+    MAX_ROUTE_TTL = 120,
+    ROUTE_SIZE = 6,
+    MAX_COST_ROUTE = 20
 };
 
 typedef nx_struct RouteMsg{

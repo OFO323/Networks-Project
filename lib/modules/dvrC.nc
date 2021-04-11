@@ -26,7 +26,7 @@ implementation{
 
     components new ListC(uint16_t, 50) as l;
     dvrP.neighborList -> l;
-     components new ListC(RouteMsg*, 50) as l2;
+    components new ListC(RouteMsg, 50) as l2;
     dvrP.r_List ->l2;
 
     components new HashmapC(uint8_t, 50) as h;
