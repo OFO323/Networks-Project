@@ -17,14 +17,13 @@ typedef nx_struct RouteMsg{
     nx_uint16_t nextHop;
     nx_uint16_t cost;
     nx_uint16_t TTL;
-    nx_uint16_t payload[20]; //may need to change payload size if causes issues
 } RouteMsg; //
 
 enum {
     AM_ROUTE_PACK = 11 //might need this to differentiate route packets w/ other types for checks 
 };
 
-uint16_t numRoutes = 0; //used to show how many routes per node[needed for forloop search/comparison]
-RouteMsg routeTable[MAX_ROUTES]; // should this be a *pointer? we'll find out!
+//uint16_t numRoutes = 0; //used to show how many routes per node[needed for forloop search/comparison]
+//RouteMsg routeTable[MAX_ROUTES]; // should this be a *pointer? we'll find out!
 
 #endif
