@@ -78,6 +78,7 @@ implementation {
         //both functions below employ neighbor discovery to inititialize the nodes
         call dvrTimer2.startOneShot(90000); //initialize nodes
 
+        //call dvrTimer.startOneShot(call Random.rand32() % 2000);
         // t = 90001;
         // del = 20000 + (call Random.rand32()) % 10021;
         // call dvrTimer.startPeriodicAt(t, del); //send DV info
@@ -132,7 +133,7 @@ implementation {
         nR.nextHop = TOS_NODE_ID;
         nR.TTL = MAX_ROUTE_TTL;
         routeTable[0] = nR;
-        ++numRoutes;
+        //++numRoutes;
 
         dbg(GENERAL_CHANNEL, "Table of %d\n:", TOS_NODE_ID);
         //add immediate neighbors to inital RT
@@ -149,10 +150,10 @@ implementation {
             
             dbg(GENERAL_CHANNEL, "Destination %d | Cost %d | Next Hop %d\n", nR.dest, nR.cost, nR.nextHop);
             
-            ++numRoutes;
+            //++numRoutes;
         }
         dbg(GENERAL_CHANNEL, "numRoutes is %d\n", numRoutes);
-
+        call dvrTimer.startOneShot(call Random.rand32() % 2000);
     }
 
     command void dvr.mergeRoutes(RouteMsg *route){
@@ -200,16 +201,16 @@ implementation {
     }
 
     command void dvr.sendRoutes(){
-
-        for(i = 0; i < numRoutes; i++){
+        nSize = (uint16_t)call Neighbor.neighSize(); 
+        for(i = 0; i < (nSize+1); i++){
             nR.dest = routeTable[i].dest; 
             nR.nextHop = routeTable[i].nextHop;
             nR.cost = routeTable[i].cost;
-            memcpy((&newRoute.payload), &neighbors, sizeof(neighbors));
+            memcpy((&newRoute.payload), &routeTable, sizeof(routeTable));
 
             //makePack(&newRoute, TOS_NODE_ID, AM_BROADCAST_ADDR, MAX_ROUTE_TTL, PROTOCOL_DV, 1, &nR, PACKET_MAX_PAYLOAD_SIZE);
             dbg(GENERAL_CHANNEL, "packet sent\n");
-            call dvrSend.send(newRoute, AM_BROADCAST_ADDR);
+            call dvrSend.send(newRoute, nR.nextHop);
         }
     }
 
