@@ -53,7 +53,7 @@ module dvrP{
 implementation {
     pack newRoute;
     RouteMsg nR;
-    //RouteMsg routeTable[MAX_ROUTES];
+    RouteMsg routeTable[MAX_ROUTES];
 
     //void makeRoute(pack *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length);
     void makePack(pack *route, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
@@ -76,11 +76,13 @@ implementation {
     command void dvr.initalizeNodes(){
         numRoutes = 0;
         //both functions below employ neighbor discovery to inititialize the nodes
-        // t = (call Random.rand32()) % 2013;
-        // del = 5000 + (call Random.rand32()) % 10021;
+        call dvrTimer2.startOneShot(90000); //initialize nodes
+
+        // t = 90001;
+        // del = 20000 + (call Random.rand32()) % 10021;
         // call dvrTimer.startPeriodicAt(t, del); //send DV info
 
-        call dvrTimer2.startOneShot(90000); //initialize nodes
+        
 
 
 
@@ -95,20 +97,21 @@ implementation {
         //call Neighbor.printNeighbors();
 
         neighbors = call Neighbor.getNeighbors();
-        dbg(GENERAL_CHANNEL,"added %d to DV\n", neighbors[0]); 
+        
+        //dbg(GENERAL_CHANNEL,"added %d to DV\n", neighbors[0]); 
 
         //add immediate neighbors' distances to DV
         for (i = 0; neighbors[i] != 0; i++) {
             call distVect.insert(neighbors[i], 1);
-            dbg(GENERAL_CHANNEL,"added %d to DV\n", neighbors[i]);
-            //call neighborList.pushfront(neighbors[i]);
+            //dbg(GENERAL_CHANNEL,"added %d to DV\n", neighbors[i]);
+            call neighborList.pushfront(neighbors[i]);
         }
 
-        dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...\n", TOS_NODE_ID);
+        //dbg(GENERAL_CHANNEL, "DV FOR NODE %d is...\n", TOS_NODE_ID);
 
         //iterate thru each neighbor value extract value of cost
         for(i = 0; i < call distVect.size(); i++){
-            dbg(GENERAL_CHANNEL, "Destination %d | Cost %d\n", neighbors[i], call distVect.get(neighbors[i]));
+            //dbg(GENERAL_CHANNEL, "Destination %d | Cost %d\n", neighbors[i], call distVect.get(neighbors[i]));
         }
     }
 
@@ -122,21 +125,30 @@ implementation {
         //dbg(GENERAL_CHANNEL, "Adding self to RT : %d\n", TOS_NODE_ID);
 
         //call routeTable.insert(TOS_NODE_ID, &newRoute);
+        //commented out since it messed with indexing, will resolve in receive 
         i = 0;
         nR.dest = TOS_NODE_ID;
         nR.cost = 0;
         nR.nextHop = TOS_NODE_ID;
         nR.TTL = MAX_ROUTE_TTL;
-        call r_List.pushfront(&nR);
+        routeTable[0] = nR;
         ++numRoutes;
 
+        dbg(GENERAL_CHANNEL, "Table of %d\n:", TOS_NODE_ID);
         //add immediate neighbors to inital RT
-        for(i = 1; i < nSize; i++){
+        for(i = 1; i < (nSize+1); i++){
+            neighID = call neighborList.get(i-1);
+            //RouteMsg route;
             //dbg(GENERAL_CHANNEL, "iterating thru RT array : %d \n", i);
-            neighID = call neighborList.get(i);
-            makeRoute(&nR, neighID, neighID, 1);
-            dbg(GENERAL_CHANNEL, "Destination %d | Cost %d | Next Hop %d\n", neighID, call distVect.get(neighbors[i]), neighID);
+            
+            //makeRoute(&nR, neighID, neighID, 1);
+            nR.dest = neighID;
+            nR.nextHop = neighID;
+            nR.cost = 1;
             routeTable[i] = nR;
+            
+            dbg(GENERAL_CHANNEL, "Destination %d | Cost %d | Next Hop %d\n", nR.dest, nR.cost, nR.nextHop);
+            
             ++numRoutes;
         }
         dbg(GENERAL_CHANNEL, "numRoutes is %d\n", numRoutes);
@@ -193,24 +205,31 @@ implementation {
             nR.dest = routeTable[i].dest; 
             nR.nextHop = routeTable[i].nextHop;
             nR.cost = routeTable[i].cost;
+            memcpy((&newRoute.payload), &neighbors, sizeof(neighbors));
 
-            makePack(&newRoute, TOS_NODE_ID, AM_BROADCAST_ADDR, MAX_ROUTE_TTL, PROTOCOL_DV, 1, &nR, PACKET_MAX_PAYLOAD_SIZE);
+            //makePack(&newRoute, TOS_NODE_ID, AM_BROADCAST_ADDR, MAX_ROUTE_TTL, PROTOCOL_DV, 1, &nR, PACKET_MAX_PAYLOAD_SIZE);
+            dbg(GENERAL_CHANNEL, "packet sent\n");
             call dvrSend.send(newRoute, AM_BROADCAST_ADDR);
         }
     }
 
     event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){
-        if(len==sizeof(RouteMsg)){
-            RouteMsg* myMsg=(RouteMsg*) payload;
+        dbg(GENERAL_CHANNEL, "received packet at node %d\n", TOS_NODE_ID);
+        
+        // if(len==sizeof(RouteMsg)){
+        //     RouteMsg* myMsg=(RouteMsg*) payload;
             
-            //this is where nodes will update their routes given DV information recieved by neighbors  
-            //call dvr.updateRoutingTable(new route, )
+        //     //this is where nodes will update their routes given DV information recieved by neighbors  
+        //     //call dvr.updateRoutingTable(new route, )
 
-        }
+        // }
     }
 
     event void dvrTimer.fired(){
+        //dbg(GENERAL_CHANNEL, "timer fired\n");
         call dvr.sendRoutes();
+        //call dvrTimer.stop();
+        
     }
 
     event void dvrTimer2.fired(){
@@ -234,7 +253,7 @@ implementation {
       route->src = src;
       route->seq = seq;
       route->TTL = TTL;
-      route->Protocol = Protocol;
+      route->protocol = Protocol;
       memcpy(route->payload, payload, length);
    }
 }
