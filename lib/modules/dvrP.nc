@@ -153,7 +153,7 @@ implementation {
             //++numRoutes;
         }
         dbg(GENERAL_CHANNEL, "numRoutes is %d\n", numRoutes);
-        call dvrTimer.startOneShot(call Random.rand32() % 2000);
+        // call dvrTimer.startOneShot(call Random.rand32() % 2000);
     }
 
     command void dvr.mergeRoutes(RouteMsg *route){
@@ -229,7 +229,7 @@ implementation {
     event void dvrTimer.fired(){
         //dbg(GENERAL_CHANNEL, "timer fired\n");
         call dvr.sendRoutes();
-        //call dvrTimer.stop();
+        call dvrTimer.stop();
         
     }
 
