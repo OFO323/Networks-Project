@@ -28,22 +28,12 @@ module dvrP{
     provides interface dvr;
 
 
-    //uses interface
-    uses interface Receive;
     uses interface SimpleSend as dvrSend;
-
     uses interface Timer<TMilli> as dvrTimer;
     uses interface Timer<TMilli> as dvrTimer2;
-
     uses interface Random;
-
-    uses interface List<uint16_t> as neighborList;
-    uses interface List<RouteMsg> as r_List;
-
-    uses interface Hashmap<uint8_t> as distVect;
+    uses interface List<RouteMsg> as routeTable;
     
-    //uses interface Hashmap<RouteMsg*> as routeTable;
-
     uses interface Neighbor; //used to pull DV info from closest neighbors
 
 
@@ -55,19 +45,105 @@ implementation {
     //temp var to hold initial/pkt values for nodes
     RouteMsg nR; 
 
-    //RouteMsg routeTable[MAX_ROUTES]; //migth get rid
 
-    uint16_t numRoutes; //used to show how many routes per node[needed for forloop search/comparison]
-    uint16_t nSize;
-    uint16_t i;
-    uint8_t neighID;
-    uint8_t *neighbors;
-    uint8_t z;
-    uint8_t x;
 
-    uint32_t t, del; ////used for timer
-    
-    uint16_t distV[255];
+    //check if destination is present in a node's RT
+    bool checkRoute(uint16_t dest){
+        uint16_t nSize = call routeTable.size();
+        uint16_t i;
+        bool present = FALSE;
+
+        for(i = 0; i < nSize; i++){
+            RouteMsg temp = call routeTable.get(i);
+
+
+            if(dest == temp.dest){
+                //destination is present in routing table 
+                present = TRUE;
+                break;
+            }
+        }
+
+        return present;
+
+
+    }
+
+
+    command void dvr.begin(){
+        //check initial RT
+        if(call routeTable.size() == 0){
+            dbg(GENERAL_CHANNEL, "RT empty - neighbor discovery needed first [timing issue] \n");
+        }
+
+        //run timers
+
+
+
+    }
+
+    //called in Node.nc Recieve function w/ packet passed 
+    command void dvr.send(pack* myMsg){
+        RouteMsg temp; //to hold 
+        uint16_t i;
+        uint16_t nSize = call routeTable.size();
+
+        //check if msg's dest is in RT [therewfore connected and possible to send]
+        if (checkRoute(myMsg->dest) == FALSE){
+            dbg(GENERAL_CHANNEL,"no connection between %d and %d \n", myMsg->src, myMsg->dest);
+            return msg;
+        }
+
+        //get route associated with dest into temp var
+        for(i = 0; i < nSize; i++){
+            RouteMsg temp2 = call.routeTable.get(i);
+
+            if(temp2.dest == myMsg->dest){
+                //set main temp route var as the found route associated with the dest
+                //in node's RT
+                temp = temp2;
+                break; //exit loop
+            }
+        }
+        
+        //split horizon / poison reverse: check if cost is infinity [16] then dont advertise route if true
+        if(temp.cost == MAX_COST){
+            dbg(GENERAL_CHANNEL, "cost is infinite, cant advertise route from %d to %d \n", myMsg->scr, myMsg->dest);
+            return msg;
+        }
+
+
+
+        dbg(GENERAL_CHANNEL, "Route Package Sent \n");
+        dbg(GENERAL_CHANNEL, "Contents: src: %d dest: %d seq: %d cost: %d nextHop: %d \n", myMsg->src, myMsg->dest, myMsg->seq, temp.cost, temp.nextHop);
+
+        call dvrSend.send(*myMsg, temp.nextHop);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     //should start randomly and send out information periodically
     command void dvr.initalizeNodes(){
@@ -75,16 +151,6 @@ implementation {
 
         //both functions below employ neighbor discovery to inititialize the nodes
         call dvrTimer2.startOneShot(90000); //initialize nodes
-
-        //call dvrTimer.startOneShot(call Random.rand32() % 2000);
-        // t = 90001;
-        // del = 20000 + (call Random.rand32()) % 10021;
-        // call dvrTimer.startPeriodicAt(t, del); //send DV info
-
-        
-
-
-
     }
 
     command void dvr.initalizeDV(){

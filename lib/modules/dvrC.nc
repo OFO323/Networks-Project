@@ -8,13 +8,14 @@ configuration dvrC{
 
 implementation{
     components dvrP;
-    dvr = dvrP.dvr;
+    dvr = dvrP;
 
-    //may nee to include package type (i.e. ROUTE_PACK in route.h)
-    components new SimpleSendC(AM_ROUTE_PACK) as routeSender;
+    //reverted back to AM_PACK to work with Node.nc
+
+    components new SimpleSendC(AM_PACK) as routeSender;
     dvrP.dvrSend -> routeSender;
 
-    components new AMReceiverC(AM_ROUTE_PACK) as routeReciever;
+    components new AMReceiverC(AM_PACK) as routeReciever;
     dvrP.Receive -> routeReciever;
 
     components new TimerMilliC() as t;
@@ -24,17 +25,7 @@ implementation{
     components RandomC as rand;
     dvrP.Random -> rand;
 
-    components new ListC(uint16_t, 50) as l;
-    dvrP.neighborList -> l;
-     components new ListC(RouteMsg*, 50) as l2;
-    dvrP.r_List ->l2;
+    components new ListC(RouteMsg, 256) as l2;
+    dvrP.routeTable ->l2;
 
-    components new HashmapC(uint8_t, 50) as h;
-    dvrP.distVect -> h;
-
-    //components new HashmapC(uint16_t, 50) as h2;
-    // dvrP.routeTable -> h; //says no match???
-
-    components NeighborC as n;
-    dvrP.Neighbor -> n;
 }
