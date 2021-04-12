@@ -20,9 +20,8 @@
 
 
 //TODO:
-// * test each node's initial RT and DV
-// * decide on when timers should be fired 
-// * implement dvr.sendRoutes [pseudcode in textbook]
+// * change the pkt structure to carry new DV info: dest, nextHop, cost, TTL
+// * 
 
 
 module dvrP{
@@ -39,7 +38,7 @@ module dvrP{
     uses interface Random;
 
     uses interface List<uint16_t> as neighborList;
-    uses interface List<RouteMsg*> as r_List;
+    uses interface List<RouteMsg> as r_List;
 
     uses interface Hashmap<uint8_t> as distVect;
     
@@ -52,12 +51,11 @@ module dvrP{
 
 implementation {
     pack newRoute;
-    RouteMsg nR;
-    RouteMsg routeTable[MAX_ROUTES];
 
-    //void makeRoute(pack *route, uint16_t dest, uint16_t nextHop, uint16_t cost, uint16_t TTL, uint8_t* payload, uint8_t length);
-    void makePack(pack *route, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length);
+    //temp var to hold initial/pkt values for nodes
+    RouteMsg nR; 
 
+    //RouteMsg routeTable[MAX_ROUTES]; //migth get rid
 
     uint16_t numRoutes; //used to show how many routes per node[needed for forloop search/comparison]
     uint16_t nSize;
@@ -67,14 +65,14 @@ implementation {
     uint8_t z;
     uint8_t x;
 
-    uint32_t t, del; //used for timer
+    uint32_t t, del; ////used for timer
     
     uint16_t distV[255];
-
 
     //should start randomly and send out information periodically
     command void dvr.initalizeNodes(){
         numRoutes = 0;
+
         //both functions below employ neighbor discovery to inititialize the nodes
         call dvrTimer2.startOneShot(90000); //initialize nodes
 
@@ -94,8 +92,6 @@ implementation {
         //convertNeighbors();
 
         call distVect.insert(TOS_NODE_ID, 0); //node only knows distance to itself initially + neighbors
-
-        //call Neighbor.printNeighbors();
 
         neighbors = call Neighbor.getNeighbors();
         
@@ -121,12 +117,7 @@ implementation {
         //initial # of immediate nieghbors
         nSize = (uint16_t)call Neighbor.neighSize(); 
 
-        //add self to RT
-        //makeRoute(&nR, TOS_NODE_ID, TOS_NODE_ID, 0);
-        //dbg(GENERAL_CHANNEL, "Adding self to RT : %d\n", TOS_NODE_ID);
 
-        //call routeTable.insert(TOS_NODE_ID, &newRoute);
-        //commented out since it messed with indexing, will resolve in receive 
         i = 0;
         nR.dest = TOS_NODE_ID;
         nR.cost = 0;
@@ -202,41 +193,43 @@ implementation {
 
     command void dvr.sendRoutes(){
         nSize = (uint16_t)call Neighbor.neighSize(); 
-        for(i = 0; i < (nSize+1); i++){
+        for(i = 0; i < (nSize); i++){
             nR.dest = routeTable[i].dest; 
             nR.nextHop = routeTable[i].nextHop;
             nR.cost = routeTable[i].cost;
+            nR.TTL = TOS_NODE_ID; //wanna track this for a bit
             memcpy((&newRoute.payload), &routeTable, sizeof(routeTable));
 
-            //makePack(&newRoute, TOS_NODE_ID, AM_BROADCAST_ADDR, MAX_ROUTE_TTL, PROTOCOL_DV, 1, &nR, PACKET_MAX_PAYLOAD_SIZE);
             dbg(GENERAL_CHANNEL, "packet sent\n");
-            call dvrSend.send(newRoute, nR.nextHop);
+            
+            call dvrSend.send(newRoute, AM_BROADCAST_ADDR); //might chng this to broadcast since next hop might end up being
         }
     }
 
     event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){
         dbg(GENERAL_CHANNEL, "received packet at node %d\n", TOS_NODE_ID);
         
-        // if(len==sizeof(RouteMsg)){
-        //     RouteMsg* myMsg=(RouteMsg*) payload;
-            
-        //     //this is where nodes will update their routes given DV information recieved by neighbors  
-        //     //call dvr.updateRoutingTable(new route, )
+        if(len==sizeof(pack)){
+            pack* myMsg=(pack*) payload;
 
-        // }
+            dbg(GENERAL_CHANNEL, "testing recieved destination : %d \n", myMsg->TTL);
+            
+            //this is where nodes will update their routes given DV information recieved by neighbors  
+            //call dvr.updateRoutingTable(new route, )
+
+        }
+        dbg(GENERAL_CHANNEL, "Unknown Packet Type %d\n", len);
     }
 
     event void dvrTimer.fired(){
-        //dbg(GENERAL_CHANNEL, "timer fired\n");
+        dbg(GENERAL_CHANNEL, "timer fired\n");
         call dvr.sendRoutes();
         call dvrTimer.stop();
-        
     }
 
     event void dvrTimer2.fired(){
         call dvr.initalizeDV();
         call dvr.intializeRT();
-
     }
 
     //placeholder: may be redundant but can be useful for updating nieghbor array in situations where node connection lost
@@ -247,14 +240,4 @@ implementation {
         }
     }
 
-    //changed to new DVR struct to be sent to neighbors
-
-    void makePack(pack *route, uint16_t src, uint16_t dest, uint16_t TTL, uint16_t Protocol, uint16_t seq, uint8_t *payload, uint8_t length){
-      route->dest = dest;
-      route->src = src;
-      route->seq = seq;
-      route->TTL = TTL;
-      route->protocol = Protocol;
-      memcpy(route->payload, payload, length);
-   }
 }

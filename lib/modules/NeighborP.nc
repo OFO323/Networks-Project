@@ -68,7 +68,7 @@ implementation {
             dbg(NEIGHBOR_CHANNEL, "A neighbor of node %d is %d\n",TOS_NODE_ID, call n_List.get(i));
         }
     }
-    
+
     //RH : added as an extension for project 2
     //works fine but may need to implement check incase multiple of the same nodeID appear
     command uint8_t* Neighbor.getNeighbors(){ 
@@ -94,9 +94,12 @@ implementation {
     }
 
     event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len){
-      if(len==sizeof(pack)){
+        if(len==sizeof(pack)){
             pack* myMsg=(pack*) payload;
-            if(myMsg->protocol == 1){ //ping reply received -> neighbor acknowledged and added to list 
+
+
+            //ping reply received -> neighbor acknowledged and added to list
+            if(myMsg->protocol == 1){  
                 /*where you would add to list*/
                 if (myMsg->TTL == 0){      
                     //dbg(GENERAL_CHANNEL, "packet expired // TTL == 0\n"); //RH: debug                     
@@ -108,7 +111,6 @@ implementation {
                     
                 if(myMsg->TTL == 1){
                     //dbg(GENERAL_CHANNEL, "neighbor node %d acknowledged\n", myMsg->src);
-
                     for(j = 0; j < call n_List.size(); j++){ //check current list of neighbors 
                         if(myMsg->src == call n_List.get(j)){ //already in list 
                             
@@ -129,7 +131,7 @@ implementation {
       Package->seq = seq;
       Package->protocol = protocol;
       memcpy(Package->payload, payload, length);
-   }
+    }
 
 
 }
