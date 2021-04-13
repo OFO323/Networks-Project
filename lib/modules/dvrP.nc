@@ -122,11 +122,14 @@ implementation {
         call dvrSend.send(*myMsg, temp.nextHop);
     }
 
+
+    //called in Node.nc recieve function for packets with Route protocol
     command void dvr.receive(pack* myMsg){
         uint16_t i;
         RouteMsg tempRoute; //current route
+        uint16_t nSize = call routeTable.size();
 
-        //1 route per pkt
+        //1 route per pkt [if more would need to be a loop]
         memcpy(&tempRoute, (&myMsg->payload) + ROUTE_SIZE, ROUTE_SIZE);
 
         //check is dest is the current node
@@ -142,12 +145,77 @@ implementation {
             tempRoute.cost = MAX_COST;
         }
 
-
+        //bellman-ford algo for determining lowest cost of path
         if((tempRoute.cost+1) < MAX_COST ){
             tempRoute.cost = tempRoute.cost + 1; //add 1 hop distance from current node
         } else {
             tempRoute.cost = MAX_COST;
         }
+
+        //if not in RT and a valid route, add to RT
+        if(checkRoute(tempRoute.dest)==FALSE && tempRoute.cost < MAX_COST){
+            tempRoute.dest = myMsg->dest;
+            tempRoute.TTL = MAX_ROUTE_TTL; //temp value
+            tempRoute.nextHop = myMsg->nextHop;
+
+            //changed route
+            tempRoute.updated = TRUE; //flagged as updated in order to send out only updated routes later[since we send one route at a time]
+
+
+            call routeTable.pushback(tempRoute);
+
+            //updated routes need to be sent out here
+
+
+        } else {
+            //route already present in RT
+
+            RouteMsg oldRoute; //existing route
+            
+            //find route in RT
+            for(i = 0; i < nSize; i++){
+                oldRoute = call.routeTable.get(i); 
+
+                if(oldRoute.dest == tempRoute.dest){
+                    //in node's RT
+                    oldRoute = temp2;
+                    break; //exit loop
+                }
+            }
+
+            if((oldRoute.nextHop == myMsg->src && oldRoute.cost != myMsg->cost) || oldRoute.cost > myMsg->cost){
+                oldRoute.TTL = MAX_ROUTE_TTL;
+                oldRoute.nextHop = myMsg->src;
+                oldRoute.updated = TRUE;
+
+                //route cost changed, needs to be updated
+                // if(oldRoute.cost != myMsg->cost || oldRoute.cost > myMsg->cost){
+                //     oldRoute.nextHop = myMsg->src;
+                //     oldRoute.updated = TRUE;
+                // }
+
+                //do old routes need to be freed from memeory? [Garbage collection]
+
+
+                oldRoute.cost = tempRoute.cost;
+            } else {
+                //route not changed -> reset TTL
+                oldRoute.TTL = MAX_ROUTE_TTL;
+            }
+
+            //update RT here
+            for(i = 0; i < nSize; i++){
+                RouteMsg curr = call routeTable.get(i);
+                if(oldRoute.dest == curr.dest){
+                    call routeTable.set(i, oldRoute);
+                    return;
+                }
+
+            }
+
+        }
+
+
     }
 
 
