@@ -11,6 +11,7 @@ enum {
     MAX_ROUTES = 128,
     MAX_ROUTE_TTL = 120,
     MAX_COST = 16,      //given by book 
+    ROUTE_SIZE = 5,
     //may add more stuff for checks
 };
 

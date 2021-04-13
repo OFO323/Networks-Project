@@ -7,6 +7,9 @@
 #include "../../includes/protocol.h"
 #include "../../includes/route.h"
 
+#undef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+
 
 //Peterson 3.3.2 pg 243-252
 
@@ -105,19 +108,46 @@ implementation {
                 break; //exit loop
             }
         }
-        
+
         //split horizon / poison reverse: check if cost is infinity [16] then dont advertise route if true
         if(temp.cost == MAX_COST){
             dbg(GENERAL_CHANNEL, "cost is infinite, cant advertise route from %d to %d \n", myMsg->scr, myMsg->dest);
             return msg;
         }
 
-
-
         dbg(GENERAL_CHANNEL, "Route Package Sent \n");
         dbg(GENERAL_CHANNEL, "Contents: src: %d dest: %d seq: %d cost: %d nextHop: %d \n", myMsg->src, myMsg->dest, myMsg->seq, temp.cost, temp.nextHop);
 
+        //pass route msg to nextHop
         call dvrSend.send(*myMsg, temp.nextHop);
+    }
+
+    command void dvr.receive(pack* myMsg){
+        uint16_t i;
+        RouteMsg tempRoute; //current route
+
+        //1 route per pkt
+        memcpy(&tempRoute, (&myMsg->payload) + ROUTE_SIZE, ROUTE_SIZE);
+
+        //check is dest is the current node
+
+        //check cost is not greater than max cost
+
+
+        //Split Horizon / Poison Reverse:
+        //if recieved route pkt has next hop as current node, advertise infinite cost back
+        //so route not taken again
+        if(tempRoute.nextHop == TOS_NODE_ID){ //curr node is next stop in route 
+            //poison reverse
+            tempRoute.cost = MAX_COST;
+        }
+
+
+        if((tempRoute.cost+1) < MAX_COST ){
+            tempRoute.cost = tempRoute.cost + 1; //add 1 hop distance from current node
+        } else {
+            tempRoute.cost = MAX_COST;
+        }
     }
 
 
